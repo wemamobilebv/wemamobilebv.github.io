@@ -141,7 +141,7 @@
                 return `
                     <div class="rss-item ${index === currentIndex ? 'active' : 'inactive'}">
                         <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
-                        ${item.mediaContent ? `<img src="${item.mediaContent}" alt="Nieuwsafbeelding">` : ""}
+                        ${item.mediaContent ? `<img src="${item.mediaContent}" style="height: 250px;" alt="Nieuwsafbeelding">` : ""}
                         <p>${item.description}</p>
                         <p><small>${new Date(item.pubDate).toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" })}</small></p>
                     </div>
