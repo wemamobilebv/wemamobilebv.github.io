@@ -156,7 +156,7 @@
             feedContainer.innerHTML = feedItems.map((item, index) => {
                 return `
                     <div class="rss-item ${index === currentIndex ? 'active' : 'inactive'}">
-                        <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+                        <a href="${item.link}" target="_blank" rel="noopener noreferrer" style="margin-top: 2em;">${item.title}</a>
                         ${item.mediaContent ? `<img src="${item.mediaContent}" style="height: 150px;" alt="Nieuwsafbeelding">` : ""}
                         <p>${item.description}</p>
                         <p><small>${new Date(item.pubDate).toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" })}</small></p>
