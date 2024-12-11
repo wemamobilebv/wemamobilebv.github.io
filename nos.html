@@ -103,7 +103,7 @@
         /* Media Query for TV and Large Screens */
         @media (min-width: 1920px) {
             #rss-widget h3 {
-                font-size: 4.5em;
+                font-size: 2em;
             }
             .rss-item a {
                 font-size: 3em;
@@ -119,7 +119,6 @@
 </head>
 <body>
     <div id="rss-widget">
-        <h3>Laatste Nieuws</h3>
         <div id="rss-feed"></div>
     </div>
 
@@ -158,7 +157,7 @@
                 return `
                     <div class="rss-item ${index === currentIndex ? 'active' : 'inactive'}">
                         <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
-                        ${item.mediaContent ? `<img src="${item.mediaContent}" alt="Nieuwsafbeelding">` : ""}
+                        ${item.mediaContent ? `<img src="${item.mediaContent}" style="height: 150px;" alt="Nieuwsafbeelding">` : ""}
                         <p>${item.description}</p>
                         <p><small>${new Date(item.pubDate).toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" })}</small></p>
                     </div>
