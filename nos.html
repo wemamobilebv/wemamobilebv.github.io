@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #E6E6E6;
+        }
+        #rss-widget {
+            width: 100vw;
+            height: 110vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            overflow: hidden;
+        }
+        #rss-widget h3 {
+            margin-top: 0;
+            font-size: 2.5em;
+            color: #C8102E;
+            background-color: #F6F6F6;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #rss-feed {
+            height: 70%;
+            width: 90%;
+            max-width: 800px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .rss-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow: hidden; /* Hides the scrollbar */
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
+            scrollbar-width: none;    /* Hides scrollbar for Firefox */
+        }
+        .rss-item::-webkit-scrollbar {
+            display: none; /* Hides scrollbar for Webkit browsers */
+        }
+        .rss-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .rss-item.inactive {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+        .rss-item a {
+            text-decoration: none;
+            color: #C8102E;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .rss-item a:hover {
+            text-decoration: underline;
+        }
+        .rss-item img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .rss-item p {
+            font-size: 1.2em;
+            color: #333;
+            line-height: 1.6em;
+            text-align: justify;
+        }
+        .rss-item p small {
+            color: #777;
+            font-size: 0.9em;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="rss-widget">
+        <h3>Laatste Nieuws</h3>
+        <div id="rss-feed"></div>
+    </div>
+
+    <script>
+        const feedUrl = "https://feeds.nos.nl/nosnieuwsalgemeen";
+        let scrollInterval; // Variable to store the interval for text auto-scroll
+        let currentIndex = 0;
+        let feedItems = [];
+
+        async function fetchRSS() {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+                const data = await response.json();
+
+                if (data.status === "ok") {
+                    feedItems = data.items.map(item => {
+                        const mediaContent = item.enclosure ? item.enclosure.link : "";
+                        return {
+                            ...item,
+                            mediaContent
+                        };
+                    });
+                    showCurrentItem();
+                    setInterval(scrollNextItem, 20000); // Change item every 20 seconds
+                } else {
+                    console.error("Error fetching RSS feed", data);
+                }
+            } catch (error) {
+                console.error("Error fetching RSS feed", error);
+            }
+        }
+
+        function showCurrentItem() {
+            const feedContainer = document.getElementById("rss-feed");
+            feedContainer.innerHTML = feedItems.map((item, index) => {
+                return `
+                    <div class="rss-item ${index === currentIndex ? 'active' : 'inactive'}">
+                        <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+                        ${item.mediaContent ? `<img src="${item.mediaContent}" alt="Nieuwsafbeelding">` : ""}
+                        <p>${item.description}</p>
+                        <p><small>${new Date(item.pubDate).toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" })}</small></p>
+                    </div>
+                `;
+            }).join('');
+            setupAutoScroll();
+        }
+
+        function scrollNextItem() {
+            const feedContainer = document.getElementById("rss-feed");
+            const items = feedContainer.querySelectorAll('.rss-item');
+            items[currentIndex].classList.remove('active');
+            items[currentIndex].classList.add('inactive');
+
+            currentIndex = (currentIndex + 1) % feedItems.length;
+
+            items[currentIndex].classList.remove('inactive');
+            items[currentIndex].classList.add('active');
+
+            setupAutoScroll();
+        }
+
+        function setupAutoScroll() {
+            clearInterval(scrollInterval); // Clear any existing scroll interval
+
+            const activeItem = document.querySelector('.rss-item.active');
+            if (activeItem) {
+                const scrollableContent = activeItem;
+                scrollableContent.scrollTop = 0; // Reset scroll position to top
+
+                // Start auto-scrolling the content
+                scrollInterval = setInterval(() => {
+                    if (scrollableContent.scrollTop < scrollableContent.scrollHeight - scrollableContent.clientHeight) {
+                        scrollableContent.scrollBy({ top: 1, behavior: 'smooth' });
+                    } else {
+                        clearInterval(scrollInterval); // Stop scrolling if at the bottom
+                    }
+                }, 50); // Adjust the scroll speed as needed
+            }
+        }
+
+
+        fetchRSS();
+    </script>
+</body>
+</html>
